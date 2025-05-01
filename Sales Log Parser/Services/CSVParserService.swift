@@ -180,16 +180,31 @@ class CSVParserService {
         }
         
         if let dateIndex = dateIndex {
-            // Filter out irrelevant date values and keep only valid ones
-            csvData.uniqueDates = Array(Set(csvData.rows.compactMap { row in
+            // Create array of all valid dates to count occurrences
+            let allValidDates = csvData.rows.compactMap { row -> String? in
                 guard dateIndex < row.count else { return nil }
                 
                 let dateString = row[dateIndex]
                 // Simple validation - ensure it's not empty and has a certain format
-                // More sophisticated validation could be added
                 guard !dateString.isEmpty, dateString.count >= 8 else { return nil }
                 return dateString
-            })).sorted()
+            }
+            
+            // Count occurrences of each date
+            var dateCounts: [String: Int] = [:]
+            for date in allValidDates {
+                dateCounts[date, default: 0] += 1
+            }
+            
+            // Find the most common date
+            if let (mostCommonDate, count) = dateCounts.max(by: { $0.value < $1.value }) {
+                csvData.mostCommonDate = mostCommonDate
+                csvData.mostCommonDateCount = count
+                print("Most common date: \(mostCommonDate) appears \(count) times")
+            }
+            
+            // Filter out irrelevant date values and keep only valid ones for uniqueDates
+            csvData.uniqueDates = Array(Set(allValidDates)).sorted()
             print("Found \(csvData.uniqueDates.count) unique dates")
         } else {
             print("Warning: Could not find date column")
@@ -197,8 +212,8 @@ class CSVParserService {
     }
     
     // Apply filters to data
-    func applyFilters(to csvData: inout CSVData, storeId: String?, posId: String?, paymentMethod: String?) {
-        print("Applying filters - Store: \(String(describing: storeId)), POS: \(String(describing: posId)), Payment: \(String(describing: paymentMethod))")
+    func applyFilters(to csvData: inout CSVData, storeIds: [String]?, posIds: [String]?, paymentMethods: [String]?) {
+        print("Applying filters - Stores: \(String(describing: storeIds)), POS: \(String(describing: posIds)), Payments: \(String(describing: paymentMethods))")
         
         // Get column indices using flexible matching
         let storeIdIndex = csvData.storeIdColumnIndex()
@@ -209,23 +224,23 @@ class CSVParserService {
         // Filter rows based on criteria
         var filteredRows = csvData.rows
         
-        if let storeId = storeId, !storeId.isEmpty, let index = storeIdIndex {
+        if let storeIds = storeIds, !storeIds.isEmpty, let index = storeIdIndex {
             filteredRows = filteredRows.filter { row in
-                index < row.count && row[index] == storeId
+                index < row.count && storeIds.contains(row[index])
             }
             print("Filtered to \(filteredRows.count) rows after applying store filter")
         }
         
-        if let posId = posId, !posId.isEmpty, let index = posIdIndex {
+        if let posIds = posIds, !posIds.isEmpty, let index = posIdIndex {
             filteredRows = filteredRows.filter { row in
-                index < row.count && row[index] == posId
+                index < row.count && posIds.contains(row[index])
             }
             print("Filtered to \(filteredRows.count) rows after applying POS filter")
         }
         
-        if let paymentMethod = paymentMethod, !paymentMethod.isEmpty, let index = paymentMethodIndex {
+        if let paymentMethods = paymentMethods, !paymentMethods.isEmpty, let index = paymentMethodIndex {
             filteredRows = filteredRows.filter { row in
-                index < row.count && row[index] == paymentMethod
+                index < row.count && paymentMethods.contains(row[index])
             }
             print("Filtered to \(filteredRows.count) rows after applying payment method filter")
         }
@@ -236,8 +251,11 @@ class CSVParserService {
                 transactionColIndex < row.count ? row[transactionColIndex] : nil
             })
             
+            print(uniqueTransactions)
+            
             csvData.filteredTransactionCount = uniqueTransactions.count
             print("Found \(csvData.filteredTransactionCount) unique transactions")
+            
         } else {
             csvData.filteredTransactionCount = 0
             print("Warning: Could not find transaction number column")
