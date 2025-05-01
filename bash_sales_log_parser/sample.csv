@@ -1,0 +1,9 @@
+Código da Loja,Id do POS,Desc Meio Pag,Dia Formatado,Número da Transacção
+123,POS1,Credit Card,2023-01-01,TX001
+123,POS1,Credit Card,2023-01-01,TX002
+123,POS2,Debit Card,2023-01-01,TX003
+456,POS1,Credit Card,2023-01-02,TX004
+456,POS2,Cash,2023-01-02,TX005
+789,POS1,Credit Card,2023-01-03,TX006
+789,POS2,Debit Card,2023-01-03,TX007
+789,POS3,Cash,2023-01-03,TX008 

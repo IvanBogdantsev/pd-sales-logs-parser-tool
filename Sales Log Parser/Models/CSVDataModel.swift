@@ -12,6 +12,10 @@ struct CSVData {
     var uniquePaymentMethods: [String] = []
     var uniqueDates: [String] = []
     
+    // Most common date and its count
+    var mostCommonDate: String?
+    var mostCommonDateCount: Int = 0
+    
     // Filtered transaction count
     var filteredTransactionCount: Int = 0
     
@@ -83,7 +87,7 @@ struct CSVData {
     }
     
     // Filter data based on selected criteria
-    mutating func applyFilters(storeId: String?, posId: String?, paymentMethod: String?) {
+    mutating func applyFilters(storeIds: [String]?, posIds: [String]?, paymentMethods: [String]?) {
         // Implementation will filter rows and update filteredTransactionCount
         // Will be implemented in the CSV service
     }
@@ -104,7 +108,7 @@ struct CSVData {
 struct FilterPreset: Codable, Identifiable {
     var id = UUID()
     var name: String
-    var storeId: String?
-    var posId: String?
-    var paymentMethod: String?
+    var storeIds: [String]?
+    var posIds: [String]?
+    var paymentMethods: [String]?
 } 

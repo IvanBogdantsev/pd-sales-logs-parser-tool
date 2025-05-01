@@ -1,0 +1,9 @@
+[
+  {
+    "id": "1",
+    "name": "Example Preset",
+    "storeIds": ["123", "456"],
+    "posIds": ["POS1", "POS2"],
+    "paymentMethods": ["Credit Card"]
+  }
+] 
